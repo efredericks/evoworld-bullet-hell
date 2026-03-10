@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://dsn4dlqlxyfux"]
+
+[ext_resource type="Texture2D" uid="uid://b2iqnr1neyr7g" path="res://sprites/Spritesheet.png" id="1_3vyb7"]
+[ext_resource type="Script" uid="uid://bcdyxxiu68pbu" path="res://scripts/player.gd" id="1_g2els"]
+[ext_resource type="Script" uid="uid://d1o6pfyxylmxf" path="res://scripts/node_pool.gd" id="3_qhqgy"]
+[ext_resource type="PackedScene" uid="uid://d1yd2wfv4il2n" path="res://scenes/bullet.tscn" id="4_dqkch"]
+[ext_resource type="AudioStream" uid="uid://nk2m4d2aaoms" path="res://audio/PlayerAttack.wav" id="5_qlg0r"]
+[ext_resource type="AudioStream" uid="uid://dcyv1pad4v2wt" path="res://audio/PlayerDamaged.wav" id="6_tuyoq"]
+[ext_resource type="AudioStream" uid="uid://rwamah6bsony" path="res://audio/DrinkPotion.wav" id="7_fjrip"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ig7tw"]
+radius = 9.0
+height = 28.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dqkch"]
+bg_color = Color(0.11119685, 0.11119685, 0.11119678, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qlg0r"]
+bg_color = Color(0.9941377, 0.21087003, 0.35642132, 1)
+
+[node name="player" type="CharacterBody2D" unique_id=456641732 groups=["player"]]
+collision_mask = 6
+script = ExtResource("1_g2els")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=1388758523]
+position = Vector2(0, 12)
+texture = ExtResource("1_3vyb7")
+offset = Vector2(0, -12)
+region_enabled = true
+region_rect = Rect2(1696, 961.07983, 32, 31.815796)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=949540200]
+shape = SubResource("CapsuleShape2D_ig7tw")
+
+[node name="muzzle" type="Node2D" parent="." unique_id=1458943325]
+position = Vector2(0, -9)
+
+[node name="PlayerBulletPool" type="Node" parent="." unique_id=982959353]
+script = ExtResource("3_qhqgy")
+node_scene = ExtResource("4_dqkch")
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=557237279]
+offset_left = -11.0
+offset_top = -21.0
+offset_right = 11.0
+offset_bottom = -17.0
+theme_override_styles/background = SubResource("StyleBoxFlat_dqkch")
+theme_override_styles/fill = SubResource("StyleBoxFlat_qlg0r")
+max_value = 50.0
+value = 25.0
+show_percentage = false
+
+[node name="ShootAudio" type="AudioStreamPlayer" parent="." unique_id=398084035]
+stream = ExtResource("5_qlg0r")
+
+[node name="DamagedAudio" type="AudioStreamPlayer" parent="." unique_id=723023696]
+stream = ExtResource("6_tuyoq")
+
+[node name="PotionAudio" type="AudioStreamPlayer" parent="." unique_id=1902975661 groups=["player"]]
+stream = ExtResource("7_fjrip")
