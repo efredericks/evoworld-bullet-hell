@@ -21,13 +21,13 @@ func _on_body_entered(body: Node2D) -> void:
 	visible = false
 	set_process(false)
 	set_physics_process(false)
-	global_position = Vector2(0, 99999999)
+	global_position = Vector2(0, -99999999)
 	
 func _on_destroy_timer_timeout() -> void:
 	visible = false
 	set_process(false)
 	set_physics_process(false)
-	global_position = Vector2(0, 99999999)
+	global_position = Vector2(0, -99999999)
 
 func _on_visibility_changed() -> void:
 	if visible and destroy_timer:
