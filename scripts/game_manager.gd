@@ -19,6 +19,8 @@ var master_bus_idx: int
 @onready var left_boundary: CollisionShape2D = $OuterBoundary/LeftBoundary
 @onready var right_boundary: CollisionShape2D = $OuterBoundary/RightBoundary
 
+@onready var enemy_spawner = $EnemySpawner
+
 @onready var player = $player
 @onready var camera = $Camera2D
 #@export var overworld: PackedScene = preload("res://scenes/overworld.tscn")
@@ -60,6 +62,7 @@ var STONE: Array[Vector2i] = [
 ]
 
 var noise = FastNoiseLite.new()
+var noise2 = FastNoiseLite.new()
 
 #var game_map
 #var loading_done: bool = false
@@ -67,10 +70,18 @@ var noise = FastNoiseLite.new()
 #var lr: float = 0.0
 
 func _ready() -> void:
+	randomize()
+	
 	noise.seed = randi()
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	noise.frequency = 0.005  # lower = larger features
+	noise.domain_warp_enabled = true
+	noise.domain_warp_amplitude = 50.0
+	noise.domain_warp_frequency = 0.01
 	
+	noise2.seed = randi()
+	noise2.frequency = 0.002  # higher frequency = smaller details
+
 	Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
 	cursor.visible = true
 	cursor.global_position = get_global_mouse_position()
@@ -96,6 +107,12 @@ func _ready() -> void:
 	camera.limit_top = 0
 	camera.limit_right = map_width
 	camera.limit_bottom = map_height
+	
+	enemy_spawner.get_node("EnemySpawnPoint").global_position = Vector2i(100, 100)
+	enemy_spawner.get_node("EnemySpawnPoint2").global_position = Vector2i(map_width - 100, 100)
+	enemy_spawner.get_node("EnemySpawnPoint3").global_position = Vector2i(100, map_height - 100)
+	enemy_spawner.get_node("EnemySpawnPoint4").global_position = Vector2i(map_width - 100, map_height - 100)
+	
 	
 	#outer_boundary.global_position = Vector2(map_width / 2.0, map_height / 2.0)
 	#left_boundary.global_position.x = -map_width / 2.0
@@ -203,7 +220,9 @@ func _generate_overworld() -> void:
 			else:
 				# distance from center, normalized 0-1
 				var dist = Vector2(c, r).distance_to(center) / max_dist
-				var noise_val = noise.get_noise_2d(c, r) * 0.1 # returns -1.0 to 1.0
+				#var noise_val = noise.get_noise_2d(c, r) * 0.1 # returns -1.0 to 1.0
+				var noise_val = (noise.get_noise_2d(c, r) * 0.15) + (noise2.get_noise_2d(c, r) * 0.025)
+
 				# combine distance with noise
 				var val = dist + noise_val
 				atlas_pos = _get_tile_for_value(val)#noise_val)
@@ -214,7 +233,7 @@ func _generate_overworld() -> void:
 			overworld.set_cell(pos, 0, atlas_pos)
 
 func is_walkable(val: float) -> bool:
-	return val > 0.75#-0.3 and val < 0.2  # anything that isn't beach or water
+	return val < 0.75 #-0.3 and val < 0.2  # anything that isn't beach or water
 	
 func _get_tile_for_value(val: float) -> Vector2i:
 	if val < 0.2:
