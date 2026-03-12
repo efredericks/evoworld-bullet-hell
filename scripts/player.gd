@@ -24,6 +24,10 @@ var move_input: Vector2
 var last_shoot_time: float
 var additional_bullet_speed: float = 0.0
 
+# debug
+@export_category("Debug")
+@export var invincible: bool = false
+
 func _ready() -> void:
 	hp = maxHP
 	health_bar.max_value = maxHP
@@ -47,6 +51,14 @@ func _process(delta):
 		if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
 			_shoot()
 	_move_wobble()
+	
+	if Input.is_action_just_pressed("invincible"):
+		invincible = not invincible
+		if invincible:
+			sprite.modulate = Color.SPRING_GREEN
+		else:
+			sprite.modulate = Color.WHITE
+
 			
 func _shoot():
 	last_shoot_time = Time.get_unix_time_from_system()
@@ -62,15 +74,16 @@ func _shoot():
 	
 # checked via bullet script
 func take_damage(dmg: int) -> void:
-	hp -= dmg
-	if hp <= 0:
-		hp = 0
-		$"..".set_game_over()
-	else:
-		_damage_flash()
-		damaged_audio.play()
-		$"../Camera2D".damage_shake()
-		health_bar.value = hp
+	if not invincible:
+		hp -= dmg
+		if hp <= 0:
+			hp = 0
+			$"..".set_game_over()
+		else:
+			_damage_flash()
+			damaged_audio.play()
+			$"../Camera2D".damage_shake()
+			health_bar.value = hp
 
 func heal(amt: int) -> void:
 	hp += amt

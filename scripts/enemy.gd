@@ -97,7 +97,7 @@ func take_damage(dmg: int) -> void:
 	else:
 		_damage_flash()
 		health_bar.value = hp
-		damaged_audio.play()
+	damaged_audio.play()
 
 func _damage_flash() -> void:
 	sprite.modulate = Color.BLACK

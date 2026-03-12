@@ -22,7 +22,7 @@ max_speed = 50.0
 acceleration = 10.0
 drag = 0.9
 stop_range = 100.0
-shoot_rate = 0.5
+shoot_rate = 1.5
 shoot_range = 250.0
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=395154171]
