@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://mhl4fgx5x7fs"]
+
+[ext_resource type="PackedScene" uid="uid://cl708grip0jsw" path="res://scenes/enemy_bullet.tscn" id="1_f7bs4"]
+
+[node name="bullet" unique_id=1653720398 instance=ExtResource("1_f7bs4")]
+
+[node name="sprite" parent="." index="0" unique_id=395638655]
+region_rect = Rect2(528, 880, 16, 16)

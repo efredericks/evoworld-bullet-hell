@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bi4nbq4ugbjkt"]
+
+[ext_resource type="PackedScene" uid="uid://bywtiwvvivkwf" path="res://scenes/potion.tscn" id="1_qigi4"]
+
+[node name="Potion" unique_id=433250258 instance=ExtResource("1_qigi4")]
+type = 1
+value = 0.9
+
+[node name="Sprite2D" parent="." index="0" unique_id=1557223814]
+region_rect = Rect2(1096, 771, 22, 26)

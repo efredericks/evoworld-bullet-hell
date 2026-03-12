@@ -254,3 +254,7 @@ func _get_tile_for_value(val: float) -> Vector2i:
 		#return STONE[randi() % STONE.size()]
 #func _exit_tree():
 	#loading_thread.wait_to_finish()
+
+func _exit_tree():
+	if loading_thread and loading_thread.is_started():
+		loading_thread.wait_to_finish()
