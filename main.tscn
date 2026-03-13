@@ -238,6 +238,7 @@ region_rect = Rect2(2001, 753, 14, 14)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=173416757]
 position = Vector2(98, 136)
+zoom = Vector2(0.75, 0.75)
 limit_enabled = false
 limit_left = 0
 limit_top = -352

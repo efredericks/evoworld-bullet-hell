@@ -1,3 +1,4 @@
+# for html5 export to gh pages - remove threading
 extends Node2D
 
 var elapsed_time: float
@@ -32,6 +33,14 @@ const tile_size:int = 32
 @export var num_rows: int = 500
 @export var num_cols: int = 500
 
+# camera info
+@export_category("Camera")
+@export var camera_zoom_min: float = 0.1
+@export var camera_zoom_max: float = 1.5
+@export var camera_zoom_step: float = 0.15
+@export var camera_zoom_speed: float = 5.0
+var target_zoom = 1.0
+
 var map_width: int = num_cols * tile_size
 var map_height: int = num_rows * tile_size
 var half_map_width: int = int(map_width / 2)
@@ -61,6 +70,10 @@ var STONE: Array[Vector2i] = [
 	Vector2i(17,14), Vector2i(18,14), Vector2i(19,14), Vector2i(20,14)
 ]
 
+var SNOW: Array[Vector2i] = [
+	Vector2i(41,13), Vector2i(42,13), Vector2i(43,13), Vector2i(44,13), 
+]
+
 var noise = FastNoiseLite.new()
 var noise2 = FastNoiseLite.new()
 
@@ -71,6 +84,9 @@ var noise2 = FastNoiseLite.new()
 
 func _ready() -> void:
 	randomize()
+	
+	# camera zoom
+	target_zoom = camera.zoom.x
 	
 	noise.seed = randi()
 	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
@@ -90,10 +106,11 @@ func _ready() -> void:
 	# No thread - call directly
 	#await get_tree().process_frame
 	#_generate_overworld()
+	#loading_screen.visible = true
 	loading_thread = Thread.new()
 	loading_thread.start(_generate_overworld)#.bind("args")	
 	loading_thread.wait_to_finish()
-	
+	#loading_screen.visible = false
 	var oc = open_cells[randi_range(0, len(open_cells)-1)]
 	
 	outer_boundary.global_position = Vector2.ZERO
@@ -129,6 +146,10 @@ func _ready() -> void:
 	print("bottom boundary y: ", bottom_boundary.global_position.y)
 	
 func _process(delta) -> void:
+	# camera zoom
+	var _camera_z := lerpf(camera.zoom.x, target_zoom, camera_zoom_speed * delta)
+	camera.zoom = Vector2(_camera_z, _camera_z)
+	
 	
 	#if loading_done:
 	elapsed_time += delta
@@ -170,7 +191,15 @@ func set_game_over() -> void:
 	Engine.time_scale = 0.0
 	end_screen.visible = true
 	end_label.text = "You survived for %.1f seconds" % elapsed_time
-	
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.pressed:
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				target_zoom = clampf(target_zoom + camera_zoom_step, camera_zoom_min, camera_zoom_max)
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				target_zoom = clampf(target_zoom - camera_zoom_step, camera_zoom_min, camera_zoom_max)
+
 func _on_retry_button_pressed() -> void:
 	Engine.time_scale = 1.0
 	get_tree().reload_current_scene()
@@ -236,7 +265,9 @@ func is_walkable(val: float) -> bool:
 	return val < 0.75 #-0.3 and val < 0.2  # anything that isn't beach or water
 	
 func _get_tile_for_value(val: float) -> Vector2i:
-	if val < 0.2:
+	if val < 0.1:
+		return SNOW[randi() % SNOW.size()]
+	elif val < 0.2:
 		return STONE[randi() % STONE.size()]
 	elif val < 0.45:
 		return GRASS[randi() % GRASS.size()]

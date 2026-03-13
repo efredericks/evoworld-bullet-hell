@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://hhufkyeula8x"]
+
+[ext_resource type="PackedScene" uid="uid://vaufyw3xpot6" path="res://scenes/enemy.tscn" id="1_j85ko"]
+[ext_resource type="Script" uid="uid://ckkxuswvnov83" path="res://scripts/gp_enemy.gd" id="2_1q4au"]
+
+[node name="enemy" unique_id=352211709 instance=ExtResource("1_j85ko")]
+script = ExtResource("2_1q4au")
+GP_weights = Array[float]([])
+
+[node name="sprite" parent="." index="0" unique_id=395154171]
+region_rect = Rect2(1189, 993, 22, 31)
