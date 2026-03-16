@@ -2,9 +2,17 @@
 
 [ext_resource type="Script" uid="uid://briw4cywtlw22" path="res://scripts/menu.gd" id="1_vjb58"]
 [ext_resource type="LabelSettings" uid="uid://dut53ty0xhecq" path="res://labelsettings.tres" id="1_yqeox"]
+[ext_resource type="Shader" uid="uid://b1rls6bx2k6dx" path="res://shaders/menubackground.gdshader" id="3_con2f"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vjb58"]
 bg_color = Color(0.14853883, 0.14906716, 0.13318515, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mhnvy"]
+shader = ExtResource("3_con2f")
+shader_parameter/speed = 2.00000009174012
+shader_parameter/scale = 1.5000000679901202
+shader_parameter/color_a = Color(0, 0, 0, 1)
+shader_parameter/color_b = Color(0.44238165, 0.7464108, 0.8098851, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_vjb58"]
 font_size = 24
@@ -30,6 +38,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vjb58")
+
+[node name="BackgroundShader" type="ColorRect" parent="." unique_id=1136908886]
+material = SubResource("ShaderMaterial_mhnvy")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Title" type="Label" parent="." unique_id=910312566]
 layout_mode = 1

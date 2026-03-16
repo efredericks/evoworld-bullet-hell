@@ -35,7 +35,7 @@ var GP_primitives: Array[String] = ["/", "\\", "-", "+", "*", "`", "~"]
 @export var GP_max_random: int = 5
 
 func _setup_random():
-	for i in range(randi_range(0, GP_max_random)):
+	for i in range(10):#randi_range(0, GP_max_random)):
 		GP_stack.append(GP_primitives[randi_range(0, len(GP_primitives)-1)])
 		
 	GP_Label.text = " ".join(PackedStringArray(GP_stack))
@@ -47,6 +47,10 @@ func _ready() -> void:
 	scale = Vector2(4., 4.)
 	
 	_setup_random()
+	if "/" in GP_stack:
+		set_collision_mask_value(3, false) # flying!
+	else:
+		set_collision_mask_value(3, true) # not flying!
 	
 func _process(delta: float) -> void:
 	if not player: return
@@ -66,6 +70,7 @@ func _process(delta: float) -> void:
 			_shoot()
 			
 	_move_wobble()
+
 	
 func _physics_process(delta: float) -> void:
 	if not player: return

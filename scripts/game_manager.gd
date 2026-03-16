@@ -270,7 +270,7 @@ func _generate_overworld() -> void:
 			overworld.set_cell(pos, 0, atlas_pos)
 
 func is_walkable(val: float) -> bool:
-	return val < 0.75 #-0.3 and val < 0.2  # anything that isn't beach or water
+	return val < 0.65 #-0.3 and val < 0.2  # anything that isn't beach or water
 	
 func _get_tile_for_value(val: float) -> Vector2i:
 	if val < 0.1:
