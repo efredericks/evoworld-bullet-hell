@@ -55,8 +55,9 @@ var BLOCKING: Dictionary = {
 }
 
 var WATER: Array[Vector2i] = [
-	Vector2i(27, 19), Vector2i(28, 19), Vector2i(29, 19), Vector2i(30, 19), Vector2i(31, 19),
-	Vector2i(32, 19), Vector2i(33, 19), Vector2i(34, 19), Vector2i(35, 19),
+	#Vector2i(27, 19), Vector2i(28, 19), Vector2i(29, 19), Vector2i(30, 19), Vector2i(31, 19),
+	#Vector2i(32, 19), Vector2i(33, 19), Vector2i(34, 19), Vector2i(35, 19),
+	Vector2i(19, 19), Vector2i(20, 19)#, Vector2i(21, 19), Vector2i(22, 19), 
 ]
 var GRASS: Array[Vector2i] = [
 	Vector2i(0, 15), Vector2i(1, 15), Vector2i(2, 15), Vector2i(3, 15), 
@@ -77,11 +78,17 @@ var SNOW: Array[Vector2i] = [
 var noise = FastNoiseLite.new()
 var noise2 = FastNoiseLite.new()
 
+@onready var GP_enemy = $enemy
+
 #var game_map
 #var loading_done: bool = false
 #var loading_start: bool = false
 #var lr: float = 0.0
 
+func get_random_open_position() -> Vector2:
+	var cell = open_cells[randi_range(0, open_cells.size() - 1)]
+	return Vector2(cell.x * tile_size, cell.y * tile_size)
+	
 func _ready() -> void:
 	randomize()
 	
@@ -111,7 +118,7 @@ func _ready() -> void:
 	loading_thread.start(_generate_overworld)#.bind("args")	
 	loading_thread.wait_to_finish()
 	#loading_screen.visible = false
-	var oc = open_cells[randi_range(0, len(open_cells)-1)]
+	#var oc = open_cells[randi_range(0, len(open_cells)-1)]
 	
 	outer_boundary.global_position = Vector2.ZERO
 	left_boundary.global_position = Vector2(0, map_height / 2.0)
@@ -125,10 +132,10 @@ func _ready() -> void:
 	camera.limit_right = map_width
 	camera.limit_bottom = map_height
 	
-	enemy_spawner.get_node("EnemySpawnPoint").global_position = Vector2i(100, 100)
-	enemy_spawner.get_node("EnemySpawnPoint2").global_position = Vector2i(map_width - 100, 100)
-	enemy_spawner.get_node("EnemySpawnPoint3").global_position = Vector2i(100, map_height - 100)
-	enemy_spawner.get_node("EnemySpawnPoint4").global_position = Vector2i(map_width - 100, map_height - 100)
+	enemy_spawner.get_node("EnemySpawnPoint").global_position = get_random_open_position() #Vector2i(100, 100)
+	enemy_spawner.get_node("EnemySpawnPoint2").global_position = get_random_open_position() #Vector2i(map_width - 100, 100)
+	enemy_spawner.get_node("EnemySpawnPoint3").global_position = get_random_open_position() #Vector2i(100, map_height - 100)
+	enemy_spawner.get_node("EnemySpawnPoint4").global_position = get_random_open_position() #Vector2i(map_width - 100, map_height - 100)
 	
 	
 	#outer_boundary.global_position = Vector2(map_width / 2.0, map_height / 2.0)
@@ -137,7 +144,8 @@ func _ready() -> void:
 	#top_boundary.global_position.y = -map_height / 2.0
 	#bottom_boundary.global_position.y = map_height / 2.0
 	#
-	player.global_position = Vector2(oc.x * tile_size, oc.y * tile_size)
+	player.global_position = get_random_open_position() #Vector2(oc.x * tile_size, oc.y * tile_size)
+	GP_enemy.global_position = player.global_position
 	camera.global_position - player.global_position
 	print("outer position:", outer_boundary.global_position)
 	print("left boundary x: ", left_boundary.global_position.x)

@@ -3,9 +3,27 @@
 [ext_resource type="PackedScene" uid="uid://vaufyw3xpot6" path="res://scenes/enemy.tscn" id="1_j85ko"]
 [ext_resource type="Script" uid="uid://ckkxuswvnov83" path="res://scripts/gp_enemy.gd" id="2_1q4au"]
 
+[sub_resource type="LabelSettings" id="LabelSettings_1q4au"]
+font_size = 12
+outline_size = 1
+outline_color = Color(0.75984395, 0.6681915, 0.9975323, 1)
+shadow_size = 10
+shadow_color = Color(0, 0, 0, 0.47058824)
+
 [node name="enemy" unique_id=352211709 instance=ExtResource("1_j85ko")]
 script = ExtResource("2_1q4au")
 GP_weights = Array[float]([])
+GP_max_random = 5
 
 [node name="sprite" parent="." index="0" unique_id=395154171]
 region_rect = Rect2(1189, 993, 22, 31)
+
+[node name="GPLabel" type="Label" parent="." index="7" unique_id=40117226]
+offset_left = -20.0
+offset_top = 11.0
+offset_right = 20.0
+offset_bottom = 34.0
+text = "GP"
+label_settings = SubResource("LabelSettings_1q4au")
+horizontal_alignment = 1
+vertical_alignment = 1

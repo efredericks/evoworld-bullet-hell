@@ -1171,7 +1171,9 @@ texture_region_size = Vector2i(32, 32)
 17:19/0 = 0
 18:19/0 = 0
 19:19/0 = 0
+19:19/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 20:19/0 = 0
+20:19/0/physics_layer_0/polygon_0/points = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 21:19/0 = 0
 22:19/0 = 0
 23:19/0 = 0
@@ -3037,6 +3039,7 @@ texture_region_size = Vector2i(32, 32)
 
 [resource]
 tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 4
 terrain_set_0/mode = 0
 terrain_set_0/terrain_0/name = "Land"
 terrain_set_0/terrain_0/color = Color(0.594353, 0.08917815, 0.6747339, 1)

@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://ctmy0ipjct7s2" path="res://scenes/move_speed_potion.tscn" id="11_dg77c"]
 [ext_resource type="LabelSettings" uid="uid://dut53ty0xhecq" path="res://labelsettings.tres" id="13_ycdy4"]
 [ext_resource type="AudioStream" uid="uid://bvopca6bwdl6b" path="res://audio/Music.wav" id="14_w48qg"]
+[ext_resource type="PackedScene" uid="uid://hhufkyeula8x" path="res://scenes/GP_enemy.tscn" id="16_2cqfq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_272bh"]
 size = Vector2(384, 321)
@@ -56,14 +57,38 @@ node_scene = ExtResource("7_272bh")
 [node name="EnemySpawnPoint" type="Node2D" parent="EnemySpawner" unique_id=1808083928]
 position = Vector2(65, -288)
 
+[node name="Sprite2D" type="Sprite2D" parent="EnemySpawner/EnemySpawnPoint" unique_id=78729176]
+scale = Vector2(3, 3)
+texture = ExtResource("1_ig7tw")
+region_enabled = true
+region_rect = Rect2(1344, 359, 32, 20)
+
 [node name="EnemySpawnPoint2" type="Node2D" parent="EnemySpawner" unique_id=2139154854]
 position = Vector2(1089, -287)
+
+[node name="Sprite2D2" type="Sprite2D" parent="EnemySpawner/EnemySpawnPoint2" unique_id=531165091]
+scale = Vector2(3, 3)
+texture = ExtResource("1_ig7tw")
+region_enabled = true
+region_rect = Rect2(1344, 359, 32, 20)
 
 [node name="EnemySpawnPoint3" type="Node2D" parent="EnemySpawner" unique_id=1062842945]
 position = Vector2(65, 673)
 
+[node name="Sprite2D3" type="Sprite2D" parent="EnemySpawner/EnemySpawnPoint3" unique_id=583296627]
+scale = Vector2(3, 3)
+texture = ExtResource("1_ig7tw")
+region_enabled = true
+region_rect = Rect2(1344, 359, 32, 20)
+
 [node name="EnemySpawnPoint4" type="Node2D" parent="EnemySpawner" unique_id=1280244524]
 position = Vector2(1089, 674)
+
+[node name="Sprite2D4" type="Sprite2D" parent="EnemySpawner/EnemySpawnPoint4" unique_id=445911629]
+scale = Vector2(3, 3)
+texture = ExtResource("1_ig7tw")
+region_enabled = true
+region_rect = Rect2(1344, 359, 32, 20)
 
 [node name="CenterObstacle" type="StaticBody2D" parent="." unique_id=1646163707]
 position = Vector2(384, 65)
@@ -251,6 +276,9 @@ script = ExtResource("2_h2yge")
 z_index = 99
 position = Vector2(37, 98)
 max_speed = 1500.0
+
+[node name="enemy" parent="." unique_id=352211709 instance=ExtResource("16_2cqfq")]
+position = Vector2(303, 248)
 
 [connection signal="timeout" from="EnemySpawner/SpawnTimer" to="EnemySpawner" method="_on_spawn_timer_timeout"]
 [connection signal="timeout" from="PotionSpawner/SpawnTimer" to="PotionSpawner" method="_on_spawn_timer_timeout"]

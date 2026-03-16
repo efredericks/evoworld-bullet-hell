@@ -25,14 +25,28 @@ var last_shoot_time: float
 @onready var muzzle = $muzzle
 @onready var health_bar: ProgressBar = $HealthBar
 @onready var damaged_audio: AudioStreamPlayer = $DamagedAudio
-
+@onready var GP_Label = $GPLabel
 
 var player_dist: float
 var player_dir: Vector2
 
+var GP_stack: Array[String] = []
+var GP_primitives: Array[String] = ["/", "\\", "-", "+", "*", "`", "~"]
+@export var GP_max_random: int = 5
+
+func _setup_random():
+	for i in range(randi_range(0, GP_max_random)):
+		GP_stack.append(GP_primitives[randi_range(0, len(GP_primitives)-1)])
+		
+	GP_Label.text = " ".join(PackedStringArray(GP_stack))
+	
 func _ready() -> void:
 	health_bar.max_value = maxHP
 	health_bar.value = hp
+	
+	scale = Vector2(4., 4.)
+	
+	_setup_random()
 	
 func _process(delta: float) -> void:
 	if not player: return

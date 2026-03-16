@@ -56,8 +56,10 @@ func _process(delta):
 		invincible = not invincible
 		if invincible:
 			sprite.modulate = Color.SPRING_GREEN
+			set_collision_mask_value(3, false) # flying!
 		else:
 			sprite.modulate = Color.WHITE
+			set_collision_mask_value(3, true)
 
 			
 func _shoot():
