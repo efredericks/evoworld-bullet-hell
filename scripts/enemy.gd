@@ -43,9 +43,9 @@ func _process(delta: float) -> void:
 		sprite.flip_h = player_dir.x > 0
 	
 	# shoot towards player
-	if player_dist < shoot_range:
-		if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
-			_shoot()
+	#if player_dist < shoot_range:
+		#if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
+			#_shoot()
 			
 	_move_wobble()
 	

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bw5sy8paon1fn"]
+
+[ext_resource type="Script" uid="uid://bmqu7e6mfotl8" path="res://scripts/creature_leavings.gd" id="1_80wvs"]
+[ext_resource type="Texture2D" uid="uid://b2iqnr1neyr7g" path="res://sprites/Spritesheet.png" id="1_ut85e"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_80wvs"]
+radius = 7.0
+
+[node name="CreatureLeavings" type="CharacterBody2D" unique_id=161895140 groups=["CreatureLeavings"]]
+script = ExtResource("1_80wvs")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1114387245]
+texture = ExtResource("1_ut85e")
+region_enabled = true
+region_rect = Rect2(1479, 751, 18, 12)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=835528856]
+shape = SubResource("CircleShape2D_80wvs")

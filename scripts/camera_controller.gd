@@ -1,5 +1,7 @@
 extends Camera2D
 
+# creature poops and a plant grows?
+
 @onready var target = $"../player"
 @export var follow_rate: float = 2.0
 

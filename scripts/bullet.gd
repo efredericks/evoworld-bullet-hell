@@ -6,22 +6,27 @@ extends Area2D
 
 var additional_speed: float = 0.0 # potion impact
 var move_dir: Vector2
+var override_target: Node2D = null
+
+
 
 func _process(delta):
 	translate(move_dir * (speed + additional_speed) * delta)
 	rotation = move_dir.angle()
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.is_in_group(owner_group):
+	if body.is_in_group(owner_group):# and override_target == null:
 		return
-		
-	if body.has_method("take_damage"):
-		body.take_damage(1)
-
-	visible = false
-	set_process(false)
-	set_physics_process(false)
-	global_position = Vector2(0, -99999999)
+	
+	if not body.is_in_group(owner_group):# or body == override_target:
+		if body.has_method("take_damage"):
+			body.take_damage(1)
+			
+			override_target = null
+			visible = false
+			set_process(false)
+			set_physics_process(false)
+			global_position = Vector2(0, -99999999)
 	
 func _on_destroy_timer_timeout() -> void:
 	visible = false

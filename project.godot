@@ -88,6 +88,7 @@ invincible={
 2d_physics/layer_1="Character"
 2d_physics/layer_2="Bullet"
 2d_physics/layer_3="Obstacle"
+2d_physics/layer_4="EnvironmentAlwaysBlock"
 
 [physics]
 

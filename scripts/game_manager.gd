@@ -13,46 +13,31 @@ var master_bus_idx: int
 @onready var loading_screen = $CanvasLayer/LoadingScreen
 @onready var loading_rotator = $CanvasLayer/LoadingScreen/Rotator
 
-# boundaries
+# overworld things
 @onready var outer_boundary: StaticBody2D = $OuterBoundary
 @onready var bottom_boundary: CollisionShape2D = $OuterBoundary/BottomBoundary
 @onready var top_boundary: CollisionShape2D = $OuterBoundary/TopBoundary
 @onready var left_boundary: CollisionShape2D = $OuterBoundary/LeftBoundary
 @onready var right_boundary: CollisionShape2D = $OuterBoundary/RightBoundary
-
-@onready var enemy_spawner = $EnemySpawner
-
-@onready var player = $player
-@onready var camera = $Camera2D
-#@export var overworld: PackedScene = preload("res://scenes/overworld.tscn")
 @onready var overworld = $overworld
 var loading_thread: Thread
 const tile_size:int = 32
-
 # map data - move to its own script after this works
 @export var num_rows: int = 500
 @export var num_cols: int = 500
-
-# camera info
-@export_category("Camera")
-@export var camera_zoom_min: float = 0.1
-@export var camera_zoom_max: float = 1.5
-@export var camera_zoom_step: float = 0.15
-@export var camera_zoom_speed: float = 5.0
-var target_zoom = 1.0
-
 var map_width: int = num_cols * tile_size
 var map_height: int = num_rows * tile_size
 var half_map_width: int = int(map_width / 2)
 var half_map_height: int = int(map_height / 2)
 
 var open_cells: Array[Vector2i] = []
-var WALKABLE: Dictionary = {
-	"BRICK_FLOOR": [Vector2i(17,14), Vector2i(18,14), Vector2i(19,14), Vector2i(20,14)],
-}
-var BLOCKING: Dictionary = { 
-	"BRICK_WALL": [Vector2i(22,13), Vector2i(23,13), Vector2i(24,13), Vector2i(25,13), Vector2i(26,13), Vector2i(27,13), Vector2i(28,13)],
-}
+var BRICK_FLOOR: Array[Vector2i] = [
+	Vector2i(17,14), Vector2i(18,14), Vector2i(19,14), Vector2i(20,14),
+]
+var BRICK_WALL: Array[Vector2i] = [
+	Vector2i(22,13), Vector2i(23,13), Vector2i(24,13), Vector2i(25,13), 
+	Vector2i(26,13), Vector2i(27,13), Vector2i(28,13),
+]
 
 var WATER: Array[Vector2i] = [
 	#Vector2i(27, 19), Vector2i(28, 19), Vector2i(29, 19), Vector2i(30, 19), Vector2i(31, 19),
@@ -77,6 +62,24 @@ var SNOW: Array[Vector2i] = [
 
 var noise = FastNoiseLite.new()
 var noise2 = FastNoiseLite.new()
+#---
+
+
+
+@onready var enemy_spawner = $EnemySpawner
+@onready var player = $player
+@onready var camera = $Camera2D
+#@export var overworld: PackedScene = preload("res://scenes/overworld.tscn")
+
+# camera info
+@export_category("Camera")
+@export var camera_zoom_min: float = 0.1
+@export var camera_zoom_max: float = 1.5
+@export var camera_zoom_step: float = 0.15
+@export var camera_zoom_speed: float = 5.0
+var target_zoom = 1.0
+
+
 
 @onready var GP_enemy = $enemy
 
@@ -145,7 +148,7 @@ func _ready() -> void:
 	#bottom_boundary.global_position.y = map_height / 2.0
 	#
 	player.global_position = get_random_open_position() #Vector2(oc.x * tile_size, oc.y * tile_size)
-	GP_enemy.global_position = player.global_position
+	GP_enemy.global_position = player.global_position + Vector2(tile_size, 4*tile_size)
 	camera.global_position - player.global_position
 	print("outer position:", outer_boundary.global_position)
 	print("left boundary x: ", left_boundary.global_position.x)
@@ -253,7 +256,7 @@ func _generate_overworld() -> void:
 			var atlas_pos = Vector2i(0, 0)
 			
 			if c == 0 or c == num_cols-1 or r == 0 or r == num_rows-1:
-				atlas_pos = BLOCKING['BRICK_WALL'][randi_range(0, len(BLOCKING['BRICK_WALL'])-1)]
+				atlas_pos = BRICK_WALL[randi() % BRICK_WALL.size()]
 			else:
 				# distance from center, normalized 0-1
 				var dist = Vector2(c, r).distance_to(center) / max_dist

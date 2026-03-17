@@ -13,8 +13,12 @@ extends CharacterBody2D
 @export var shoot_range: float
 @export var flip_sprite: bool = false
 
+@export var energy: int = 100
+@export var maxEnergy: int = 100
+
 @export_category("GP stats")
 @export var GP_weights: Array[float]
+
 
 var last_shoot_time: float
 
@@ -24,27 +28,62 @@ var last_shoot_time: float
 @onready var bullet_pool = $EnemyBulletPool
 @onready var muzzle = $muzzle
 @onready var health_bar: ProgressBar = $HealthBar
+@onready var energy_bar: ProgressBar = $EnergyBar
 @onready var damaged_audio: AudioStreamPlayer = $DamagedAudio
 @onready var GP_Label = $GPLabel
 
-var player_dist: float
-var player_dir: Vector2
+# sprites
+@onready var sprite_a = $sprite
+@onready var sprite_b = $SpriteB
+@onready var sprite_c = $SpriteC
+@onready var sprite_d = $SpriteD
+@onready var sprite_list: Array[Sprite2D] = [sprite_a, sprite_b, sprite_c, sprite_d]
+var active_sprite: Sprite2D
+
+# dependencies
+@onready var creature_leavings: PackedScene = preload("res://scenes/creature_leavings.tscn")
+@onready var leavings_group: Node = get_node("../Leavings") # add leavings to this node group for ordering
+
+# targeting
+var target_dist: float
+var target_dir: Vector2
+var tracking_food: bool = false
+var target: CharacterBody2D = null
 
 var GP_stack: Array[String] = []
 var GP_primitives: Array[String] = ["/", "\\", "-", "+", "*", "`", "~"]
 @export var GP_max_random: int = 5
 
+
+# components equipped by gene expression
+## + joins
+# eat: given
+# swim:  			/+\
+# attack nearby: 	*+*
+# reproduce:	 	~
+# place block:		\+\
+
+
+
 func _setup_random():
 	for i in range(10):#randi_range(0, GP_max_random)):
 		GP_stack.append(GP_primitives[randi_range(0, len(GP_primitives)-1)])
-		
 	GP_Label.text = " ".join(PackedStringArray(GP_stack))
+	
+	# select sprite (random for now, assigned based on job)
+	active_sprite = sprite_list[randi_range(0, len(sprite_list)-1)]
+	active_sprite.visible = true
 	
 func _ready() -> void:
 	health_bar.max_value = maxHP
 	health_bar.value = hp
 	
+	energy_bar.max_value = maxEnergy
+	energy_bar.value = energy
+	
 	scale = Vector2(4., 4.)
+	
+	target = player
 	
 	_setup_random()
 	if "/" in GP_stack:
@@ -52,37 +91,41 @@ func _ready() -> void:
 	else:
 		set_collision_mask_value(3, true) # not flying!
 	
+# process components in randomized order
+# drop 
 func _process(delta: float) -> void:
 	if not player: return
 	
-	player_dist = global_position.distance_to(player.global_position)
-	player_dir = global_position.direction_to(player.global_position)
+	if not tracking_food:
+		target_dist = global_position.distance_to(player.global_position)
+		target_dir = global_position.direction_to(player.global_position)
+		target = player
 	
 	# face the player
 	if flip_sprite:
-		sprite.flip_h = player_dir.x < 0
+		sprite.flip_h = target_dir.x < 0
 	else:
-		sprite.flip_h = player_dir.x > 0
+		sprite.flip_h = target_dir.x > 0
 	
 	# shoot towards player
-	if player_dist < shoot_range:
-		if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
-			_shoot()
-			
+	#if player_dist < shoot_range:
+		#if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
+			#_shoot(player)
+	
 	_move_wobble()
 
 	
 func _physics_process(delta: float) -> void:
 	if not player: return
 	
-	var move_dir = player_dir
+	var move_dir = target_dir
 	#var forward_speed = player_dir.dot(velocity) # speed in moving direction
 	var local_avoidance = _local_avoidance()
 	
 	if local_avoidance.length() > 0:
 		move_dir = local_avoidance
 	
-	if velocity.length() < max_speed and player_dist > stop_range:
+	if velocity.length() < max_speed and target_dist > stop_range:
 		velocity += move_dir * acceleration
 	else:
 		velocity *= drag
@@ -106,11 +149,12 @@ func _local_avoidance() -> Vector2:
 	var obstacle_dir = global_position.direction_to(obstacle_point)
 	return Vector2(-obstacle_dir.y, obstacle_dir.x) # return adjacent 
 	
-func _shoot() -> void:
+func _shoot(entity) -> void:
 	last_shoot_time = Time.get_unix_time_from_system()
 	var bullet = bullet_pool.spawn()
 	bullet.global_position = muzzle.global_position
-	bullet.move_dir = muzzle.global_position.direction_to(player.global_position)
+	bullet.override_target = entity
+	bullet.move_dir = muzzle.global_position.direction_to(entity.global_position)#player.global_position)
 	
 func take_damage(dmg: int) -> void:
 	hp -= dmg
@@ -148,3 +192,34 @@ func _move_wobble():
 	var t = Time.get_unix_time_from_system()
 	var rot = 2 * sin(20 * t)
 	sprite.rotation_degrees = rot
+
+func get_energy() -> void:
+	energy += 50
+	if energy > maxEnergy:
+		energy = maxEnergy
+	energy_bar.value = energy
+
+func _on_sensing_radius_body_entered(body: Node2D) -> void:
+	if body.is_in_group("CreatureLeavings"):
+		pass
+	#_shoot(body)
+
+# eat some energy
+func _on_energy_timer_timeout() -> void:
+	if energy >= 0:
+		energy -= 1
+		
+		# drop some plant food
+		if energy % 5 == 0:
+			var leaving = creature_leavings.instantiate()
+			leaving.global_position = global_position
+			leaving.z_index = 2
+			#leavings_group.add_child.call_deferred(leaving)
+			leavings_group.add_child.call_deferred(leaving)
+		
+		
+	energy_bar.value = energy
+	if energy <= 0: 
+		take_damage(1)
+		print("damaged goods")
+			
