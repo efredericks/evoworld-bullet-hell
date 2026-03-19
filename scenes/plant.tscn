@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://cbfb1nlfobdfs"]
+
+[ext_resource type="Script" uid="uid://4wu1aihc7sjl" path="res://scripts/plant.gd" id="1_odjdt"]
+[ext_resource type="Texture2D" uid="uid://b2iqnr1neyr7g" path="res://sprites/Spritesheet.png" id="2_a88lo"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_272bh"]
+radius = 8.0
+
+[node name="Plant" type="Area2D" unique_id=433250258]
+script = ExtResource("1_odjdt")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1557223814]
+texture = ExtResource("2_a88lo")
+region_enabled = true
+region_rect = Rect2(321, 192, 30, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1598475416]
+position = Vector2(-3, 4)
+shape = SubResource("CircleShape2D_272bh")
+
+[node name="SpawnTimer" type="Timer" parent="." unique_id=121875834]
+wait_time = 10.0
+autostart = true
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="SpawnTimer" to="." method="_on_spawn_timer_timeout"]

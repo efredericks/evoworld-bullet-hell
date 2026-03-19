@@ -23,6 +23,7 @@ radius = 184.21997
 [node name="enemy" unique_id=352211709 instance=ExtResource("1_j85ko")]
 script = ExtResource("2_1q4au")
 energy = 100
+maxEnergy = 100
 GP_weights = Array[float]([])
 GP_max_random = 5
 
@@ -59,11 +60,7 @@ max_value = 50.0
 value = 25.0
 show_percentage = false
 
-[node name="EnergyTimer" type="Timer" parent="." index="10" unique_id=1600562006]
-wait_time = 0.5
-autostart = true
-
-[node name="GPLabel" type="Label" parent="." index="12" unique_id=40117226]
+[node name="GPLabel" type="Label" parent="." index="11" unique_id=40117226]
 offset_left = -20.0
 offset_top = 11.0
 offset_right = 20.0
@@ -73,10 +70,24 @@ label_settings = SubResource("LabelSettings_1q4au")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SensingRadius" type="Area2D" parent="." index="13" unique_id=5512962]
+[node name="SensingRadius" type="Area2D" parent="." index="12" unique_id=5512962]
 
 [node name="SensingCollisionShape2D" type="CollisionShape2D" parent="SensingRadius" index="0" unique_id=1297632515]
 shape = SubResource("CircleShape2D_1q4au")
 
-[connection signal="timeout" from="EnergyTimer" to="." method="_on_energy_timer_timeout"]
+[node name="EnergyTimer" type="Timer" parent="." index="13" unique_id=1600562006]
+wait_time = 0.5
+autostart = true
+
+[node name="MutateTimer" type="Timer" parent="." index="14" unique_id=1751202726]
+wait_time = 10.0
+autostart = true
+
+[node name="WaitOnStartTimer" type="Timer" parent="." index="15" unique_id=344329589]
+wait_time = 3.0
+autostart = true
+
 [connection signal="body_entered" from="SensingRadius" to="." method="_on_sensing_radius_body_entered"]
+[connection signal="timeout" from="EnergyTimer" to="." method="_on_energy_timer_timeout"]
+[connection signal="timeout" from="MutateTimer" to="." method="_on_mutate_timer_timeout"]
+[connection signal="timeout" from="WaitOnStartTimer" to="." method="_on_wait_on_start_timer_timeout"]

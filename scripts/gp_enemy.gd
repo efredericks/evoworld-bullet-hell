@@ -1,3 +1,5 @@
+# rework this to make self-instantiating easier (OR better, make a controller script that is in charge)
+
 extends CharacterBody2D
 
 @export_category("Base stats")
@@ -21,6 +23,7 @@ extends CharacterBody2D
 
 
 var last_shoot_time: float
+var active: bool = false # wait a bit to start
 
 @onready var player = get_tree().get_first_node_in_group("player")
 @onready var avoidance_ray: RayCast2D = $AvoidanceRay
@@ -40,9 +43,12 @@ var last_shoot_time: float
 @onready var sprite_list: Array[Sprite2D] = [sprite_a, sprite_b, sprite_c, sprite_d]
 var active_sprite: Sprite2D
 
+@onready var timers: Array[Timer] = [$EnergyTimer, $MutateTimer, $WaitOnStartTimer]
+
 # dependencies
+@onready var self_scene: PackedScene = preload("res://scenes/GP_enemy.tscn")
 @onready var creature_leavings: PackedScene = preload("res://scenes/creature_leavings.tscn")
-@onready var leavings_group: Node = get_node("../Leavings") # add leavings to this node group for ordering
+#@onready var leavings_group: Node = get_node("../Leavings") # add leavings to this node group for ordering
 
 # targeting
 var target_dist: float
@@ -53,9 +59,16 @@ var target: CharacterBody2D = null
 var GP_stack: Array[String] = []
 var GP_primitives: Array[String] = ["/", "\\", "-", "+", "*", "`", "~"]
 @export var GP_max_random: int = 5
-
+var available_actions: Array[String] = []
+var execution_actions: Array[String] = []
 
 # components equipped by gene expression
+var patterns: Dictionary = {
+	"/+\\": "swim",
+	"*+*": "attack",
+	"~": "reproduce",
+	"\\+\\": "place_block",
+}
 ## + joins
 # eat: given
 # swim:  			/+\
@@ -66,13 +79,37 @@ var GP_primitives: Array[String] = ["/", "\\", "-", "+", "*", "`", "~"]
 
 
 func _setup_random():
-	for i in range(10):#randi_range(0, GP_max_random)):
+	for i in range(50):#randi_range(0, GP_max_random)):
 		GP_stack.append(GP_primitives[randi_range(0, len(GP_primitives)-1)])
-	GP_Label.text = " ".join(PackedStringArray(GP_stack))
+	GP_Label.text = "".join(PackedStringArray(GP_stack))
 	
 	# select sprite (random for now, assigned based on job)
 	active_sprite = sprite_list[randi_range(0, len(sprite_list)-1)]
 	active_sprite.visible = true
+	
+	for k in patterns:
+		if k in GP_Label.text:
+			available_actions.append(patterns[k])
+	print(available_actions)
+	
+
+func set_genome(genome):
+	GP_stack = genome
+	
+func _mutate():
+	var mutant = self_scene.instantiate()
+	mutant.global_position = global_position
+	mutant.z_index = 5
+	mutant.set_genome(GP_stack)
+	var idx = randi_range(0, len(mutant.GP_stack)-1)
+	mutant.GP_stack[idx] = GP_primitives[randi_range(0, len(GP_primitives)-1)]
+	#mutant.GP_Label.text = "".join(PackedStringArray(mutant.GP_stack))
+	
+	get_tree().get_root().add_child.call_deferred(mutant)
+	
+	
+	
+	
 	
 func _ready() -> void:
 	health_bar.max_value = maxHP
@@ -96,21 +133,22 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not player: return
 	
-	if not tracking_food:
-		target_dist = global_position.distance_to(player.global_position)
-		target_dir = global_position.direction_to(player.global_position)
-		target = player
-	
-	# face the player
-	if flip_sprite:
-		sprite.flip_h = target_dir.x < 0
-	else:
-		sprite.flip_h = target_dir.x > 0
-	
-	# shoot towards player
-	#if player_dist < shoot_range:
-		#if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
-			#_shoot(player)
+	if active:
+		if not tracking_food:
+			target_dist = global_position.distance_to(player.global_position)
+			target_dir = global_position.direction_to(player.global_position)
+			target = player
+		
+		# face the player
+		if flip_sprite:
+			sprite.flip_h = target_dir.x < 0
+		else:
+			sprite.flip_h = target_dir.x > 0
+		
+		# shoot towards player
+		#if player_dist < shoot_range:
+			#if Time.get_unix_time_from_system() - last_shoot_time > shoot_rate:
+				#_shoot(player)
 	
 	_move_wobble()
 
@@ -118,19 +156,20 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not player: return
 	
-	var move_dir = target_dir
-	#var forward_speed = player_dir.dot(velocity) # speed in moving direction
-	var local_avoidance = _local_avoidance()
-	
-	if local_avoidance.length() > 0:
-		move_dir = local_avoidance
-	
-	if velocity.length() < max_speed and target_dist > stop_range:
-		velocity += move_dir * acceleration
-	else:
-		velocity *= drag
+	if active:
+		var move_dir = target_dir
+		#var forward_speed = player_dir.dot(velocity) # speed in moving direction
+		var local_avoidance = _local_avoidance()
 		
-	move_and_slide()
+		if local_avoidance.length() > 0:
+			move_dir = local_avoidance
+		
+		if velocity.length() < max_speed and target_dist > stop_range:
+			velocity += move_dir * acceleration
+		else:
+			velocity *= drag
+			
+		move_and_slide()
 	
 # avoid obstacles when following
 func _local_avoidance() -> Vector2:
@@ -161,6 +200,9 @@ func take_damage(dmg: int) -> void:
 	if hp <= 0:
 		hp = 0
 		visible = false
+		
+		for t in timers:
+			t.stop()
 	else:
 		_damage_flash()
 		health_bar.value = hp
@@ -206,20 +248,29 @@ func _on_sensing_radius_body_entered(body: Node2D) -> void:
 
 # eat some energy
 func _on_energy_timer_timeout() -> void:
-	if energy >= 0:
-		energy -= 1
-		
-		# drop some plant food
-		if energy % 5 == 0:
-			var leaving = creature_leavings.instantiate()
-			leaving.global_position = global_position
-			leaving.z_index = 2
-			#leavings_group.add_child.call_deferred(leaving)
-			leavings_group.add_child.call_deferred(leaving)
-		
-		
-	energy_bar.value = energy
-	if energy <= 0: 
-		take_damage(1)
-		print("damaged goods")
+	if active:
+		if energy >= 0:
+			energy -= 1
 			
+			# drop some plant food
+			if energy % 5 == 0:
+				var leaving = creature_leavings.instantiate()
+				leaving.global_position = global_position
+				leaving.z_index = 2
+				get_tree().get_root().add_child.call_deferred(leaving)
+				#leavings_group.add_child.call_deferred(leaving)
+			
+			
+		energy_bar.value = energy
+		if energy <= 0: 
+			take_damage(1)
+			print("damaged goods")
+			
+
+
+func _on_mutate_timer_timeout() -> void:
+	self._mutate()
+
+
+func _on_wait_on_start_timer_timeout() -> void:
+	active = true

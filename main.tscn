@@ -34,7 +34,12 @@ tile_set = ExtResource("2_vivmo")
 [node name="overworld" type="TileMapLayer" parent="." unique_id=169508501]
 tile_set = ExtResource("2_vivmo")
 
+[node name="plant_map" type="TileMapLayer" parent="." unique_id=168976825]
+tile_set = ExtResource("2_vivmo")
+
 [node name="Leavings" type="Node" parent="." unique_id=627170431]
+
+[node name="Plants" type="Node" parent="." unique_id=753850274]
 
 [node name="EnemySpawner" type="Node" parent="." unique_id=327625550 node_paths=PackedStringArray("enemy_pools", "spawn_points")]
 script = ExtResource("5_lquwl")
@@ -247,7 +252,7 @@ volume_db = -8.0
 autoplay = true
 
 [node name="MouseCursor" type="Sprite2D" parent="." unique_id=431872998]
-modulate = Color(1, 1, 1, 0.39607844)
+modulate = Color(1, 1, 1, 0.8)
 texture = ExtResource("1_ig7tw")
 region_enabled = true
 region_rect = Rect2(2001, 753, 14, 14)
@@ -271,10 +276,14 @@ max_speed = 1500.0
 [node name="enemy" parent="." unique_id=352211709 instance=ExtResource("16_2cqfq")]
 z_index = 5
 position = Vector2(303, 248)
-maxEnergy = 100
+
+[node name="PlantSpawnTimer" type="Timer" parent="." unique_id=863732917]
+wait_time = 3.0
+autostart = true
 
 [connection signal="timeout" from="EnemySpawner/SpawnTimer" to="EnemySpawner" method="_on_spawn_timer_timeout"]
 [connection signal="timeout" from="PotionSpawner/SpawnTimer" to="PotionSpawner" method="_on_spawn_timer_timeout"]
 [connection signal="pressed" from="CanvasLayer/EndScreen/RetryButton" to="." method="_on_retry_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/EndScreen/QuitButton" to="." method="_on_quit_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/AudioButton" to="." method="_on_button_pressed"]
+[connection signal="timeout" from="PlantSpawnTimer" to="." method="_on_plant_spawn_timer_timeout"]

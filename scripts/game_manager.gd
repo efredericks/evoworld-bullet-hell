@@ -22,6 +22,7 @@ var master_bus_idx: int
 @onready var overworld = $overworld
 var loading_thread: Thread
 const tile_size:int = 32
+var half_tile_size: int = int(tile_size / 2)
 # map data - move to its own script after this works
 @export var num_rows: int = 500
 @export var num_cols: int = 500
@@ -60,6 +61,13 @@ var SNOW: Array[Vector2i] = [
 	Vector2i(41,13), Vector2i(42,13), Vector2i(43,13), Vector2i(44,13), 
 ]
 
+var PLANT_SPAWNS: Array[Vector2i] = [
+	Vector2i(12,18), Vector2i(13,18), Vector2i(14,18), Vector2i(15,18), Vector2i(16,18), Vector2i(17,18), #trees
+	Vector2i(9,6), Vector2i(10,6), Vector2i(11,6), #plants
+]
+var plant_positions: Array[Dictionary] = []
+@onready var plant_map := $plant_map
+
 var noise = FastNoiseLite.new()
 var noise2 = FastNoiseLite.new()
 #---
@@ -92,8 +100,29 @@ func get_random_open_position() -> Vector2:
 	var cell = open_cells[randi_range(0, open_cells.size() - 1)]
 	return Vector2(cell.x * tile_size, cell.y * tile_size)
 	
+# convert a global position to cells
+func convert_world_to_cells(gpos) -> Vector2i:
+	var ret = Vector2i(int(gpos.x / tile_size), int(gpos.y / tile_size))
+	if ret.x < 0 or ret.x > num_cols-1 or ret.y < 0 or ret.y > num_rows - 1:
+		print("Error fetching grid coordinates")
+		return Vector2i(-1, -1)
+	return ret
+
+func is_cell_open(pos: Vector2i) -> bool:
+	if pos in open_cells:
+		return true
+	return false
+
+func remove_open_cell(cpos: Vector2i) -> void:
+	if cpos in open_cells:
+		open_cells.erase(cpos)
+	else:
+		print("Somehow, the cell wasn't found even though it should have been!")
+		
 func _ready() -> void:
 	randomize()
+	
+	add_to_group("game_manager")
 	
 	# camera zoom
 	target_zoom = camera.zoom.x
@@ -111,6 +140,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
 	cursor.visible = true
 	cursor.global_position = get_global_mouse_position()
+	cursor.z_index = 98
 	master_bus_idx = AudioServer.get_bus_index("Master")
 
 	# No thread - call directly
@@ -300,3 +330,21 @@ func _get_tile_for_value(val: float) -> Vector2i:
 func _exit_tree():
 	if loading_thread and loading_thread.is_started():
 		loading_thread.wait_to_finish()
+
+# spread plants
+const DIRS = [
+	[-1, -1], [0, -1], [1, -1],
+	[-1, 0], [1, 0],
+	[-1, 1], [0, 1], [1, 1],
+]
+func _on_plant_spawn_timer_timeout() -> void:
+	if len(plant_positions) > 0:
+		var idx = randi_range(0, len(plant_positions)-1)
+		var dir = DIRS[randi_range(0, len(DIRS)-1)]
+		var plant_pos = plant_positions[idx]['pos']
+		var next_pos := Vector2i(plant_pos.x + dir[0], plant_pos.y + dir[1])
+		if next_pos.x >= 0 and next_pos.x <= num_cols-1 and next_pos.y >= 0 and next_pos.y <= num_rows-1:
+			if is_cell_open(next_pos):
+				plant_map.set_cell(next_pos, 0, plant_positions[idx]['atlas_id'])
+				remove_open_cell(next_pos)
+		
