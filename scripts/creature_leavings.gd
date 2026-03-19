@@ -52,15 +52,15 @@ func _on_timer_timeout() -> void:
 	queue_free()
 	
 	# in _physics_process or on input
-func check_plant_interaction() -> void:
-	var player_cell = Vector2i(
-		int(player.global_position.x / tile_size),
-		int(player.global_position.y / tile_size)
-	)
-	## check player cell and neighbors
-	#for offset in [Vector2i(0,0), Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]:
-		#var cell = player_cell + offset
-		#var data = plant_layer.get_cell_tile_data(cell)
-		#if data and data.get_custom_data("interactable"):
-			#_interact_with_plant(cell)
-			#break
+#func check_plant_interaction() -> void:
+	#var player_cell = Vector2i(
+		#int(player.global_position.x / tile_size),
+		#int(player.global_position.y / tile_size)
+	#)
+	### check player cell and neighbors
+	##for offset in [Vector2i(0,0), Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]:
+		##var cell = player_cell + offset
+		##var data = plant_layer.get_cell_tile_data(cell)
+		##if data and data.get_custom_data("interactable"):
+			##_interact_with_plant(cell)
+			##break
